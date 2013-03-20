@@ -12,26 +12,19 @@ def parseSequence(sequence,numberperline,indentation=0):
 def parseFasta(path):
 	fastadir={}
 	fileisNotOK=True
-	while  fileisNotOK:
-		if os.path.exists(path) and os.path.isfile(path):
-			fasta = open(path,"r")
-			seq=""
-	
-			fastalines=fasta.readlines()
-			fasta.close()
-			if fastalines[0][0]!=">":
-				print "ERROR: The file doesn't start with '>', therefore is not in Fasta format"
-				path=raw_input("Path of the file: ")
-				fileisNotOK=True
-			else:
-				fileisNotOK=False
+	if os.path.exists(path) and os.path.isfile(path):
+		fasta = open(path,"r")
+		seq=""
+
+		fastalines=fasta.readlines()
+		fasta.close()
+		if fastalines[0][0]!=">":
+			raise ValueError("ERROR: The file doesn't start with '>', therefore is not in Fasta format")
 		else:
-			print "ERROR: The file doesn't exist or is not a file"
-			path=raw_input("Path of the file: ")
-			fileisNotOK=True
-			
-		
-	
+			fileisNotOK=False
+	else:
+		raise ValueError("ERROR: The file doesn't exist or is not a file")
+
 	fastadir["id"]=fastalines[0][1:].strip()
 	
 	seq=""
@@ -98,9 +91,12 @@ if len(sys.argv)!=2:
 	print "ERROR: You must specify a fasta file path."
 else:
 	path = sys.argv[1]
-	fasta=parseFasta(path)
-	if fasta==False:
+	try:
+		fasta=parseFasta(path)
+	except ValueError:
+		print "error in file"
 		sys.exit()
+	
 	header = "the sequence of the file "+fasta["id"]+ " is:"
 	print header
 	print parseSequence(fasta["sequence"],50,len(header))
